@@ -9,5 +9,8 @@
     "handlebars": "~1.2.1",
     "grunt-contrib-clean": "~0.5.0",
     "jsdom": "~0.8.10"
+  },
+  "scripts": {
+    "test": "grunt test && mocha tmp/test"
   }
 }

@@ -4,7 +4,6 @@ import I18nHandlebarsExtractor from "../lib/extractor";
 describe("I18nExtractor", function(){
 
   function extract(source, scope, options) {
-    scope   = scope || 'asdf';
     options = options || {};
 
     var extractor = new I18nHandlebarsExtractor({
@@ -84,6 +83,41 @@ describe("I18nExtractor", function(){
       result = extract('{{#t "baz"}}this is <b>so cool!<img /></b>{{/t}}');
 
       assert.deepEqual(result, { baz: 'this is *so cool!*'});
+    });
+  });
+
+  describe('scoping', function(){
+
+    it('auto-scopes relative to the current scope', function(){
+      assert.deepEqual(extract('{{#t "foo"}}Foo{{/t}}', 'asdf'),
+                       { asdf: { foo: 'Foo' } });
+    });
+
+    it("does not auto-scope absolute keys", function(){
+      var keys = extract('{{#t "#foo"}}Foo{{/t}}', 'asdf');
+
+      assert.deepEqual(keys, { foo: 'Foo' });
+    });
+  });
+
+  describe('collisions', function(){
+
+    it('does not let you reuse a key', function(){
+      assert.throws(function(){
+        extract('{{#t "foo"}}Foo{{/t}}{{#t "foo"}}bar{{/t}}');
+      }, /cannot reuse key/);
+    });
+
+    it('does not let you use a scope as key', function(){
+      assert.throws(function(){
+        extract('{{#t "foo.bar"}}bar{{/t}}{{#t "foo"}}foo{{/t}}')
+      }, /used as both scope and a key/);
+    });
+
+    it('does not let you use a key as a scope', function(){
+      assert.throws(function(){
+        extract('{{#t "foo"}}foo{{/t}}{{#t "foo.bar"}}bar{{/t}}');
+      }, /used as both scope and a key/);
     });
   });
 });
