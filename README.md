@@ -28,11 +28,11 @@ Basically, we want the same functionality that [I18nliner][i18nliner] has.
 
 * Throw errors on malformed markup
 * Add useful line number information since it's now possible to get that
-information from the Handlebars compiler
+information from the Handlebars compiler([link](https://github.com/wycats/handlebars.js/pull/692)).
 * Get wrappers working better. We need to be able to hang on to the original
 HTML
 * Moar tests
-[link](https://github.com/wycats/handlebars.js/pull/692).
+
 
 <!-- links -->
 [i18nliner]: https://github.com/jenseng/i18nliner
