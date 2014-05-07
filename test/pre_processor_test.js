@@ -1,7 +1,8 @@
 import {assert} from "chai";
 import sinon from "sinon";
-import PreProcessor from "../lib/pre_processor";
 import Handlebars from "handlebars";
+import Errors from "../lib/errors";
+import PreProcessor from "../lib/pre_processor";
 
 describe("PreProcessor", function() {
   before(function() {
@@ -59,7 +60,11 @@ describe("PreProcessor", function() {
       });
     });
 
-    it("disallows nesting non-t block expressions in a t block expression");
+    it("disallows nesting non-t block expressions in a t block expression", function() {
+      assert.throws(function() {
+        p('{{#t}}{{#s}}nope{{/s}}{{/t}}');
+      }, Errors.TBlockNestingError);
+    });
 
     it("creates wrappers for markup");
 
