@@ -1,11 +1,44 @@
 import {assert} from "chai";
+import sinon from "sinon";
 import PreProcessor from "../lib/pre_processor";
+import Handlebars from "handlebars";
 
 describe("PreProcessor", function() {
-  describe(".process", function() {
-    it("transforms t block expressions");
+  before(function() {
+    var StringNode = Handlebars.AST.StringNode;
+    this.inferKey = sinon.stub(PreProcessor, "inferKey", function() {
+      return new StringNode("key");
+    });
+  });
 
-    it("removes extraneous whitespace from the default");
+  after(function() {
+    this.inferKey.restore();
+  });
+
+  describe(".process", function() {
+    function p(source) {
+      var ast = Handlebars.parse(source);
+      PreProcessor.process(ast);
+      return Handlebars.precompile(ast);
+    }
+
+    function c(source) {
+      return Handlebars.precompile(source);
+    }
+
+    it("transforms t block expressions", function() {
+      assert.equal(
+        p('{{#t}}hello world!{{/t}}'),
+        c('{{t "key" "hello world!"}}')
+      );
+    });
+
+    it("removes extraneous whitespace from the default", function() {
+      assert.equal(
+        p('{{#t}} ohai!  lulz\t {{/t}}'),
+        c('{{t "key" "ohai! lulz"}}')
+      )
+    });
 
     it("doesn't transform other block expressions");
 
