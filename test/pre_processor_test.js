@@ -40,9 +40,24 @@ describe("PreProcessor", function() {
       )
     });
 
-    it("doesn't transform other block expressions");
+    it("doesn't transform other block expressions", function() {
+      assert.equal(
+        p('{{#if foo}}' +
+          '  {{#t}}Your Name{{/t}}' +
+          '  <input>' +
+          '{{/if}}'),
+        c('{{#if foo}}' +
+          '  {{t "key" "Your Name"}}' +
+          '  <input>' +
+          '{{/if}}')
+      )
+    });
 
-    it("rejects malformed hbs");
+    it("rejects malformed hbs", function() {
+      assert.throws(function() {
+        p('{{#t}}')
+      });
+    });
 
     it("disallows nesting non-t block expressions in a t block expression");
 
