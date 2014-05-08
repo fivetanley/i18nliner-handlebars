@@ -83,7 +83,15 @@ describe("PreProcessor", function() {
       }, Errors.UnwrappableContentError);
     });
 
-    it("reuses identical wrappers");
+    it("reuses identical wrappers", function() {
+      assert.equal(
+        p('{{#t}}' +
+          '  the wrappers for' +
+          '  <b>these</b> <b>tags</b> are the same' +
+          '{{/t}}'),
+        c('{{t "key" "the wrappers for *these* *tags* are the same" w0="<b>$1</b>"}}')
+      );
+    });
 
     it("generates placeholders for inline expressions");
 
