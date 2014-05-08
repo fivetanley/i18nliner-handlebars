@@ -104,6 +104,13 @@ describe("PreProcessor", function() {
 
     it("generates placeholders for empty markup");
 
-    it("unescapes entities");
+    it("unescapes entities", function() {
+      assert.equal(
+        p('{{#t}}' +
+          '  &copy; 2014 ACME Corp. All Rights Reserved. Our lawyers &gt; your lawyers' +
+          '{{/t}}'),
+        c('{{t "key" "© 2014 ACME Corp. All Rights Reserved. Our lawyers > your lawyers"}}')
+      );
+    });
   });
 });
