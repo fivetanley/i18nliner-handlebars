@@ -66,9 +66,20 @@ describe("PreProcessor", function() {
       }, Errors.TBlockNestingError);
     });
 
-    it("creates wrappers for markup");
+    it("creates wrappers for markup", function() {
+      assert.equal(
+        p('{{#t}}' +
+          '  <b>bold</b>, or even <a href="#"><i><img>combos</i></a> get wrapper\'d' +
+          '{{/t}}'),
+        c('{{t "key" "*bold*, or even **combos** get wrapper\'d" w0="<b>$1</b>" w1="<a href=\\"#\\"><i><img />$1</i></a>"}}')
+      )
+    });
 
-    it("doesn't create wrappers for markup with multiple text nodes");
+    it("doesn't create wrappers for markup with multiple text nodes", function() {
+      assert.throws(function() {
+        p("{{#t}}this is <b><i>too</i> complicated</b>{{/t}}")
+      }, Errors.UnwrappableContentError);
+    });
 
     it("reuses identical wrappers");
 
