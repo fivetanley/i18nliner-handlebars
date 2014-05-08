@@ -1,3 +1,5 @@
+/* global describe, it, before, after */
+
 import {assert} from "chai";
 import sinon from "sinon";
 import Handlebars from "handlebars";
@@ -38,7 +40,7 @@ describe("PreProcessor", function() {
       assert.equal(
         p('{{#t}} ohai!  lulz\t {{/t}}'),
         c('{{t "key" "ohai! lulz"}}')
-      )
+      );
     });
 
     it("doesn't transform other block expressions", function() {
@@ -51,12 +53,12 @@ describe("PreProcessor", function() {
           '  {{t "key" "Your Name"}}' +
           '  <input>' +
           '{{/if}}')
-      )
+      );
     });
 
     it("rejects malformed hbs", function() {
       assert.throws(function() {
-        p('{{#t}}')
+        p('{{#t}}');
       });
     });
 
@@ -72,12 +74,12 @@ describe("PreProcessor", function() {
           '  <b>bold</b>, or even <a href="#"><i><img>combos</i></a> get wrapper\'d' +
           '{{/t}}'),
         c('{{t "key" "*bold*, or even **combos** get wrapper\'d" w0="<b>$1</b>" w1="<a href=\\"#\\"><i><img />$1</i></a>"}}')
-      )
+      );
     });
 
     it("doesn't create wrappers for markup with multiple text nodes", function() {
       assert.throws(function() {
-        p("{{#t}}this is <b><i>too</i> complicated</b>{{/t}}")
+        p("{{#t}}this is <b><i>too</i> complicated</b>{{/t}}");
       }, Errors.UnwrappableContentError);
     });
 

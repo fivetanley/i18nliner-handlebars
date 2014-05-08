@@ -1,3 +1,5 @@
+/* global describe, it */
+
 import I18nKeyStore from "../lib/i18n_key_store";
 import {assert} from "chai";
 

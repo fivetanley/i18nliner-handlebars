@@ -1,3 +1,4 @@
+/* global require, module */
 var matchdep = require('matchdep');
 
 module.exports = function(grunt){
@@ -26,7 +27,26 @@ module.exports = function(grunt){
         dest: 'tmp/test',
         compatFix: true
       }
-    }
+    },
+
+    jshint: {
+      all: ['Gruntfile.js', 'lib/**/*.js', 'test/**/*.js'],
+      options: {
+        esnext: true,
+        eqeqeq: true,
+        forin: true,
+        immed: true,
+        indent: 2,
+        undef: true,
+        latedef: true,
+        newcap: true,
+        nonew: true,
+        unused: true,
+        trailing: true,
+        laxcomma: true,
+        loopfunc: true
+      }
+    },
   });
 
   grunt.registerTask('test', [ 'clean', 'transpile:testLib', 'transpile:tests' ]);

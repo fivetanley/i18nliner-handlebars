@@ -1,3 +1,5 @@
+/* global describe, it */
+
 import {assert} from "chai";
 import I18nHandlebarsExtractor from "../lib/extractor";
 
@@ -110,7 +112,7 @@ describe("I18nExtractor", function(){
 
     it('does not let you use a scope as key', function(){
       assert.throws(function(){
-        extract('{{#t "foo.bar"}}bar{{/t}}{{#t "foo"}}foo{{/t}}')
+        extract('{{#t "foo.bar"}}bar{{/t}}{{#t "foo"}}foo{{/t}}');
       }, /used as both scope and a key/);
     });
 
