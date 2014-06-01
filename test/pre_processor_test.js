@@ -93,7 +93,14 @@ describe("PreProcessor", function() {
       );
     });
 
-    it("generates placeholders for inline expressions");
+    it("generates placeholders for inline expressions", function() {
+      assert.equal(
+        p('{{#t}}' +
+          '  Hello, {{name}}' +
+          '{{/t}}'),
+        c('{{t "key" "Hello, %{name}" name=name}}')
+      );
+    });
 
     it("concatenates inline expressions in wrappers", function() {
       assert.equal(
