@@ -93,7 +93,7 @@ describe("PreProcessor", function() {
       );
     });
 
-    it("generates placeholders for inline expressions", function() {
+    it("generates placeholders for inline paths", function() {
       assert.equal(
         p('{{#t}}' +
           '  Hello, {{name}}' +
@@ -102,12 +102,30 @@ describe("PreProcessor", function() {
       );
     });
 
-    it("concatenates inline expressions in wrappers", function() {
+    it("generates placeholders for inline helpers", function() {
+      assert.equal(
+        p('{{#t}}' +
+          '  Hello, {{pig-latin name}}' +
+          '{{/t}}'),
+        c('{{t "key" "Hello, %{pig_latin_name}" pig_latin_name=(pig-latin name)}}')
+      );
+    });
+
+    it("concatenates inline paths in wrappers", function() {
       assert.equal(
         p('{{#t}}' +
           '  Go to <a href="/asdf" title="{{name}}">your account</a>' +
           '{{/t}}'),
         c('{{t "key" "Go to *your account*" w0=(__i18nliner_concat "<a href=\\"/asdf\\" title=\\"" (__i18nliner_escape name) "\\">$1</a>")}}')
+      );
+    });
+
+    it("concatenates inline helpers in wrappers", function() {
+      assert.equal(
+        p('{{#t}}' +
+          '  Go to <a href="/asdf" title="{{pig-latin name}}">your account</a>' +
+          '{{/t}}'),
+        c('{{t "key" "Go to *your account*" w0=(__i18nliner_concat "<a href=\\"/asdf\\" title=\\"" (__i18nliner_escape (pig-latin name)) "\\">$1</a>")}}')
       );
     });
 
