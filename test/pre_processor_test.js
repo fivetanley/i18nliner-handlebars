@@ -132,7 +132,14 @@ describe("PreProcessor", function() {
     // this is really the same as the one above, but it's good to have a
     // spec for this in case the underlying implementation changes
     // dramatically
-    it("transforms nested t block expressions in wrappers");
+    it("transforms nested t block expressions in wrappers", function() {
+      assert.equal(
+        p('{{#t}}' +
+          '  Go to <a href="/asdf" title="{{#t}}manage account stuffs, {{name}}{{/t}}">your account</a>' +
+          '{{/t}}'),
+        c('{{t "key" "Go to *your account*" w0=(__i18nliner_concat "<a href=\\"/asdf\\" title=\\"" (__i18nliner_escape (t "key" "manage account stuffs, %{name}" name=name)) "\\">$1</a>")}}')
+      );
+    });
 
     it("generates placeholders for empty markup");
 
