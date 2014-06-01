@@ -141,7 +141,14 @@ describe("PreProcessor", function() {
       );
     });
 
-    it("generates placeholders for empty markup");
+    it("generates placeholders for empty markup", function() {
+      assert.equal(
+        p('{{#t}}' +
+          '  Create <input type="text" name="count"> groups' +
+          '{{/t}}'),
+        c('{{t "key" "Create %{input_type_text_name_count} groups" input_type_text_name_count=(__i18nliner_safe "<input type=\\"text\\" name=\\"count\\" />")}}')
+      );
+    });
 
     it("unescapes entities", function() {
       assert.equal(
