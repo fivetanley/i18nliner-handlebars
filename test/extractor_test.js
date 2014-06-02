@@ -1,125 +1,75 @@
 /* global describe, it */
 
 import {assert} from "chai";
-import I18nHandlebarsExtractor from "../lib/extractor";
+import Handlebars from "handlebars";
+import Extractor from "../lib/extractor";
+import PreProcessor from "../lib/pre_processor";
+import I18nliner from "i18nliner";
 
-describe("I18nExtractor", function(){
+var Errors = I18nliner.Errors;
+var TranslationHash = I18nliner.TranslationHash;
 
-  function extract(source, scope, options) {
-    options = options || {};
-
-    var extractor = new I18nHandlebarsExtractor({
-      source: source,
-      scope: scope
+describe("Extractor", function() {
+  function extract(source) {
+    var ast = Handlebars.parse(source);
+    PreProcessor.process(ast);
+    var extractor = new Extractor(ast);
+    var hash = new TranslationHash();
+    extractor.forEach(function(key, value) {
+      hash.set(key, value);
     });
-
-    return extractor.translations;
+    return hash.translations;
   }
 
-  describe("keys", function(){
-    it('allows valid string keys', function(){
-      assert.deepEqual(extract('{{#t "foo"}}Foo{{/t}}'), { foo: 'Foo' });
-    });
-
-    it("raises an error if string key has spaces", function(){
-      assert.throws(function(){
-        extract('{{#t "foo bar"}}Foo{{/t}}');
-      });
-    });
+  it("should ignore non-t calls", function() {
+    assert.deepEqual(
+      extract("{{foo 'Foo'}}"),
+      {}
+    );
   });
 
-  describe("well-formed-ness", function(){
-
-    it("raises an error if t calls aren't closed", function(){
-
-      assert.throws(function(){
-        extract('{{#t "foo"}}Foo{{/t}}{{#t "bar"}}whoops');
-      });
-    });
+  it("should not extract t calls with no default", function() {
+    assert.deepEqual(
+      extract("{{t 'foo.foo'}}"),
+      {}
+    );
   });
 
-  describe("values", function(){
-
-    it('strips extraneous whitespace', function(){
-      var value = extract('{{#t "foo"}}\t Foo\n foo\r\n\ffoo!!! {{/t}}');
-
-      assert.deepEqual(value, { foo: 'Foo foo foo!!!' });
-    });
+  it("should extract valid t calls", function() {
+    assert.deepEqual(
+      extract("{{t 'Foo'}}"),
+      {"foo_f44ad75d": "Foo"}
+    );
+    assert.deepEqual(
+      extract("{{t 'bar' 'Baz'}}"),
+      {bar: "Baz"}
+    );
+    assert.deepEqual(
+      extract("{{t 'dog' count=count}}"),
+      {"dog_c158cde1": {one: "1 dog", other: "%{count} dogs"}}
+    );
+    assert.deepEqual(
+      extract("{{t 'hello %{user}' user=user.name}}"),
+      {"hello_user_d1318063": "hello %{user}"}
+    );
+    assert.deepEqual(
+      extract('{{#t}}ohai <b title="{{#t}}oh yeah{{/t}}">awesome {{user}}</b>{{/t}}'),
+      {"oh_yeah_87683d6e": "oh yeah", "ohai_awesome_user_90158192": "ohai *awesome %{user}*"}
+    );
   });
 
-  describe("placeholders", function(){
-
-    it('allows simple placeholders', function(){
-      assert.deepEqual(extract('{{#t "foo"}}Hello {{user.name}}{{/t}}'),
-                       { foo: 'Hello %{user.name}' });
-    });
-
-    it('disallows helpers', function(){
-      assert.throws(function(){
-        extract('{{#t "foo"}}{{call a helper}}{{/t}}');
-      });
-    });
-  });
-
-  describe('t calls inside block helpers', function(){
-
-    it('still extracts keys', function(){
-      assert.deepEqual(extract('{{#each foo}}{{#t "foo"}}Foo{{/t}}{{/each}}'),
-                       {foo: 'Foo'});
-    });
-  });
-
-  describe('wrappers', function(){
-
-    it('infers wrappers', function(){
-      var value = extract('{{#t "foo"}}Be sure to <a href="{{url}}">log in</a>. <b>Don\'t</b> you <b>dare</b> forget!!!{{/t}}');
-
-      assert.deepEqual(value, {foo: "Be sure to *log in*. **Don't** you **dare** forget!!!"});
-    });
-
-    it('allows empty tags on either side of the wrapper', function(){
-      var result = extract('{{#t "bar"}}you can <button><i class="icon-email"></i>send an email</button>{{/t}}');
-
-      assert.deepEqual(result, {bar: 'you can *send an email*'});
-
-      result = extract('{{#t "baz"}}this is <b>so cool!<img /></b>{{/t}}');
-
-      assert.deepEqual(result, { baz: 'this is *so cool!*'});
-    });
-  });
-
-  describe('scoping', function(){
-
-    it('auto-scopes relative to the current scope', function(){
-      assert.deepEqual(extract('{{#t "foo"}}Foo{{/t}}', 'asdf'),
-                       { asdf: { foo: 'Foo' } });
-    });
-
-    it("does not auto-scope absolute keys", function(){
-      var keys = extract('{{#t "#foo"}}Foo{{/t}}', 'asdf');
-
-      assert.deepEqual(keys, { foo: 'Foo' });
-    });
-  });
-
-  describe('collisions', function(){
-
-    it('does not let you reuse a key', function(){
-      assert.throws(function(){
-        extract('{{#t "foo"}}Foo{{/t}}{{#t "foo"}}bar{{/t}}');
-      }, /cannot reuse key/);
-    });
-
-    it('does not let you use a scope as key', function(){
-      assert.throws(function(){
-        extract('{{#t "foo.bar"}}bar{{/t}}{{#t "foo"}}foo{{/t}}');
-      }, /used as both scope and a key/);
-    });
-
-    it('does not let you use a key as a scope', function(){
-      assert.throws(function(){
-        extract('{{#t "foo"}}foo{{/t}}{{#t "foo.bar"}}bar{{/t}}');
-      }, /used as both scope and a key/);
-    });
+  it("should bail on invalid t calls", function() {
+    assert.throws(function(){
+      extract("{{t foo}}");
+    }, Errors.InvalidSignature);
+    assert.throws(function(){
+      extract("{{t 'foo' foo}}");
+    }, Errors.InvalidSignature);
+    assert.throws(function(){
+      extract("{{t 'foo' 'hello %{man}'}}");
+    }, Errors.MissingInterpolationValue);
+    assert.throws(function(){
+      extract("{{t 'a' 'a' 'a'}}");
+    }, Errors.InvalidSignature);
   });
 });
