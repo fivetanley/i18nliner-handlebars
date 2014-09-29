@@ -1,14 +1,31 @@
 {
-  "name": "i18nliner-handlebar",
+  "name": "i18nliner-handlebars",
+  "description": "handlebars i18n made simple",
+  "version": "0.0.1",
+  "contributors": [
+    {
+      "name": "Jon Jensen"
+    },
+    {
+      "name": "Stanley Stuart"
+    }
+  ],
+  "homepage": "https://github.com/fivetanley/i18nliner-handlebars",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/fivetanley/i18nliner-handlebars.git"
+  },
+  "main": "./dist/lib/main",
   "devDependencies": {
-    "grunt": "~0.4.2",
-    "matchdep": "~0.3.0",
-    "grunt-es6-module-transpiler": "~0.6.0",
-    "mocha": "~1.16.2",
     "chai": "~1.8.1",
-    "sinon": "~1.7.3",
+    "grunt": "~0.4.2",
     "grunt-contrib-clean": "~0.5.0",
-    "grunt-contrib-jshint": "~0.8.0"
+    "grunt-contrib-copy": "^0.6.0",
+    "grunt-contrib-jshint": "~0.8.0",
+    "grunt-es6-module-transpiler": "~0.6.0",
+    "matchdep": "~0.3.0",
+    "mocha": "~1.16.2",
+    "sinon": "~1.7.3"
   },
   "scripts": {
     "test": "grunt test && mocha tmp/test"
