@@ -47,8 +47,18 @@ module.exports = function(grunt){
         loopfunc: true
       }
     },
+
+    copy: {
+      main: {
+        cwd: 'tmp/lib/',
+        src: '**',
+        dest: 'dist/lib/',
+        expand: true
+      }
+    }
   });
 
   grunt.registerTask('test', [ 'clean', 'transpile:testLib', 'transpile:tests' ]);
   grunt.registerTask('default', [ 'transpile:testLib', 'transpile:tests' ]);
+  grunt.registerTask('dist', [ 'test', 'copy' ]);
 };

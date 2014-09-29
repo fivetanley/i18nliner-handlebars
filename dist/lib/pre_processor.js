@@ -1,0 +1,291 @@
+"use strict";
+/* global window */
+
+var Handlebars = require("handlebars")["default"] || require("handlebars");
+var jsdom = require("jsdom").jsdom;
+var I18nliner = require("i18nliner")["default"] || require("i18nliner");
+var Errors = require("./errors")["default"] || require("./errors");
+
+var dom = (function(){
+  if (typeof window !== 'undefined') {
+    return window.document;
+  } else {
+    return jsdom().parentWindow.document;
+  }
+})();
+
+var CallHelpers = I18nliner.CallHelpers
+  , AST = Handlebars.AST
+  , StringNode = AST.StringNode
+  , HashNode = AST.HashNode
+  , SexprNode = AST.SexprNode
+  , IdNode = AST.IdNode
+  , slice = [].slice
+  , TEMP_PLACEHOLDER = /__i18nliner_\d+__/g;
+
+function TempPlaceholderMap() {
+  this._map = {};
+  this._size = 0;
+}
+TempPlaceholderMap.prototype.get = function(key) {
+  return this._map[key];
+};
+TempPlaceholderMap.prototype.add = function(node) {
+  var key = "__i18nliner_" + this._size + "__";
+  this._map[key] = node;
+  this._size++;
+  return key;
+};
+
+function splitCapture(pattern, string) {
+  var result = []
+    , lastIndex = pattern.lastIndex = 0
+    , match
+    , s;
+  while ((match = pattern.exec(string))) {
+    match = match[0];
+    s = string.slice(lastIndex, pattern.lastIndex - match.length);
+    if (s.length) result.push(s);
+    result.push(match);
+    lastIndex = pattern.lastIndex;
+  }
+  s = string.slice(lastIndex);
+  if (s.length) result.push(s);
+  return result;
+}
+
+function stringNode(string) {
+  return new StringNode(string);
+}
+
+function safeNode(string) {
+  var parts = [
+    new IdNode([{part: '__i18nliner_safe'}]),
+    new StringNode(string)
+  ];
+  return new SexprNode(parts);
+}
+
+function escapeNode(sexpr) {
+  var parts = [
+    new IdNode([{part: '__i18nliner_escape'}]),
+    sexpr
+  ];
+  return new SexprNode(parts);
+}
+
+function concatNode(string, tempMap) {
+  var parts = splitCapture(TEMP_PLACEHOLDER, string)
+    , partsLen = parts.length
+    , part
+    , i;
+  for (i = 0; i < partsLen; i++) {
+    part = parts[i];
+    parts[i] = part.match(TEMP_PLACEHOLDER) ?
+      escapeNode(tempMap.get(part)) :
+      stringNode(part);
+  }
+  parts.unshift(new IdNode([{part: '__i18nliner_concat'}]));
+  return new SexprNode(parts);
+}
+
+var PreProcessor = {
+  process: function(ast) {
+    var statements = ast.statements
+      , statementsLen = statements.length
+      , statement
+      , i;
+    for (i = 0; i < statementsLen; i++) {
+      statement = statements[i];
+      if (statement.type !== 'block') continue;
+      // consume anything inside this first (e.g. if we have nested t blocks)
+      this.process(statement.program);
+      if (statement.inverse)
+        this.process(statement.inverse);
+      if (statement.mustache.id.string === "t") {
+        statements[i] = this.transform(statement);
+      }
+    }
+  },
+
+  transform: function(node) {
+    var parts = this.inferParts(node.program.statements)
+      , defaultValue = parts.defaultValue
+      , hash = parts.hash
+      , pairs;
+    node = node.mustache;
+    node.params.push(this.inferKey(defaultValue));
+    node.params.push(new StringNode(defaultValue));
+    node.isHelper = 1;
+    node.sexpr.isHelper = 1;
+    if (hash.length) {
+      if (!node.hash)
+        node.hash = node.sexpr.hash = new HashNode([]);
+      pairs = node.hash.pairs;
+      node.hash.pairs = pairs.concat(hash);
+    }
+    return node;
+  },
+
+  inferKey: function(defaultValue) {
+    return new StringNode(CallHelpers.inferKey(defaultValue));
+  },
+
+  inferParts: function(statements) {
+    var defaultValue
+      , wrappers = []
+      , hash = []
+      , tempMap = new TempPlaceholderMap();
+    defaultValue = this.extractTempPlaceholders(statements, tempMap);
+    defaultValue = this.extractWrappers(defaultValue, wrappers, tempMap, statements[0]);
+    defaultValue = this.extractPlaceholders(defaultValue, hash, tempMap);
+    defaultValue = this.normalizeDefault(defaultValue);
+    return {defaultValue: defaultValue, hash: hash.concat(wrappers)};
+  },
+
+  stringForStatement: function(statement, tempMap) {
+    var node;
+    switch (statement.type) {
+      case 'block':
+        throw new Errors.TBlockNestingError(statement.firstLine, "can't nest block expressions inside a t block");
+      case 'content':
+        return statement.string;
+      case 'mustache':
+        node = statement.sexpr;
+        if (!node.isHelper) node = node.id;
+        delete node.isRoot;
+        return tempMap.add(node);
+    }
+  },
+
+  normalizeDefault: function(string) {
+    return string.replace(/\s+/g, ' ').trim();
+  },
+
+  nodesFor: function(html) {
+    var div = dom.createElement('div');
+    div.innerHTML = html;
+    return div.childNodes;
+  },
+
+  extractTempPlaceholders: function(statements, tempMap) {
+    var defaultValue = ''
+      , i
+      , statementsLen = statements.length;
+    for (i = 0; i < statementsLen; i++) {
+      defaultValue += this.stringForStatement(statements[i], tempMap);
+    }
+    return defaultValue;
+  },
+
+  extractPlaceholders: function(string, hash, tempMap) {
+    var keyMap = {};
+    return string.replace(TEMP_PLACEHOLDER, function(match) {
+      var sexpr = tempMap.get(match)
+        , key = this.inferInterpolationKey(sexpr, keyMap);
+      keyMap[key] = true;
+      hash.push([key, sexpr]);
+      return "%{" + key + "}";
+    }.bind(this));
+  },
+
+  inferInterpolationKey: function(sexpr, keyMap) {
+    var key
+      , baseKey
+      , i = 0;
+    key = this.stringParts(sexpr).join(" ");
+    key = key.replace(/^__i18nliner_safe /, '');
+    key = key.replace(/[^a-z0-9]/g, ' ');
+    key = key.trim();
+    key = key.replace(/ +/g, '_');
+    key = key.substring(0, 32);
+    baseKey = key;
+    while (keyMap[key] && keyMap[key] !== baseKey) {
+      key = baseKey + "_" + i;
+      i++;
+    }
+    return key;
+  },
+
+  stringParts: function(sexpr, result) {
+    var i
+      , len
+      , items;
+    result = result || [];
+    if (sexpr.type === 'sexpr') {
+      this.stringParts(sexpr.id, result);
+      items = sexpr.params;
+      for (i = 0, len = items.length; i < len; i++) {
+        this.stringParts(items[i], result);
+      }
+      if (sexpr.hash) {
+        items = sexpr.hash.pairs;
+        for (i = 0, len = items.length; i < len; i++) {
+          result.push(items[i][0]);
+          this.stringParts(items[i][1], result);
+        }
+      }
+    } else {
+      result.push(sexpr.original);
+    }
+    return result;
+  },
+
+  extractWrappers: function(source, wrappers, tempMap, context) {
+    var result = ''
+      , nodes = this.nodesFor(source)
+      , nodesLen = nodes.length
+      , node
+      , wrapper
+      , wrappedText
+      , i;
+    for (i = 0; i < nodesLen; i++) {
+      node = nodes[i];
+      if (node.nodeName === '#text') {
+        result += node.nodeValue;
+      } else if ((wrappedText = this.extractText(node, context))) {
+        wrapper = node.outerHTML.replace(wrappedText, "$1");
+        this.findOrAddWrapper(wrapper, wrappers, tempMap);
+        result += this.wrap(wrappedText, wrappers.length);
+      } else {
+        result += tempMap.add(safeNode(node.outerHTML));
+      }
+    }
+    return result;
+  },
+
+  findOrAddWrapper: function(wrapper, wrappers, tempMap) {
+    var wrappersLen = wrappers.length
+      , factory = (wrapper.match(TEMP_PLACEHOLDER) ? concatNode : stringNode)
+      , i;
+    for (i = 0; i < wrappersLen; i++) {
+      if (wrappers[i][1].string === wrapper)
+        return i;
+    }
+    wrappers.push(["w" + i, factory(wrapper, tempMap)]);
+    return i;
+  },
+
+  extractText: function(rootNode, context) {
+    var text = ''
+      , nodes = slice.call(rootNode.childNodes)
+      , node;
+    while ((node = nodes.shift())) {
+      if (node.nodeName === '#text' && node.nodeValue.trim()) {
+        if (text) // there can be only one
+          throw new Errors.UnwrappableContentError(context.firstLine, "multiple text nodes in html markup");
+        text = node.nodeValue;
+      } else if (node.childNodes.length) {
+        nodes = nodes.concat(slice.call(node.childNodes));
+      }
+    }
+    return text;
+  },
+
+  wrap: function(text, index) {
+    var delimiter = new Array(index + 1).join("*");
+    return delimiter + text + delimiter;
+  }
+};
+
+exports["default"] = PreProcessor;

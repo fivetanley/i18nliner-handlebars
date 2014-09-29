@@ -1,15 +1,17 @@
 {
   "name": "i18nliner-handlebar",
   "devDependencies": {
-    "grunt": "~0.4.2",
-    "matchdep": "~0.3.0",
-    "grunt-es6-module-transpiler": "~0.6.0",
-    "mocha": "~1.16.2",
     "chai": "~1.8.1",
-    "sinon": "~1.7.3",
+    "grunt": "~0.4.2",
     "grunt-contrib-clean": "~0.5.0",
-    "grunt-contrib-jshint": "~0.8.0"
+    "grunt-contrib-copy": "^0.6.0",
+    "grunt-contrib-jshint": "~0.8.0",
+    "grunt-es6-module-transpiler": "~0.6.0",
+    "matchdep": "~0.3.0",
+    "mocha": "~1.16.2",
+    "sinon": "~1.7.3"
   },
+  "main": "./dist/lib/main",
   "scripts": {
     "test": "grunt test && mocha tmp/test"
   },
