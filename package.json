@@ -1,5 +1,21 @@
 {
-  "name": "i18nliner-handlebar",
+  "name": "i18nliner-handlebars",
+  "description": "handlebars i18n made simple",
+  "version": "0.0.1",
+  "contributors": [
+    {
+      "name": "Jon Jensen"
+    },
+    {
+      "name": "Stanley Stuart"
+    }
+  ],
+  "homepage": "https://github.com/fivetanley/i18nliner-handlebars",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/fivetanley/i18nliner-handlebars.git"
+  },
+  "main": "./dist/lib/main",
   "devDependencies": {
     "chai": "~1.8.1",
     "grunt": "~0.4.2",
@@ -11,7 +27,6 @@
     "mocha": "~1.16.2",
     "sinon": "~1.7.3"
   },
-  "main": "./dist/lib/main",
   "scripts": {
     "test": "grunt test && mocha tmp/test"
   },
