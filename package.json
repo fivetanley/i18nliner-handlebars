@@ -32,7 +32,9 @@
   },
   "dependencies": {
     "handlebars": "~1.3.0",
-    "jsdom": "~0.8.10",
-    "i18nliner": "0.0.3"
+    "jsdom": "~0.8.10"
+  },
+  "peerDependencies": {
+    "i18nliner": "0.0.10"
   }
 }
