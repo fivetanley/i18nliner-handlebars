@@ -36,6 +36,13 @@ describe("PreProcessor", function() {
       );
     });
 
+    it("transforms t block expressions with explicit keys", function(){
+      assert.equal(
+        p('{{#t "my_key"}}hello world!{{/t}}'),
+        c('{{t "my_key" "hello world!"}}')
+      );
+    });
+
     it("removes extraneous whitespace from the default", function() {
       assert.equal(
         p('{{#t}} ohai!  lulz\t {{/t}}'),
