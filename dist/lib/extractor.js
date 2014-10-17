@@ -1,6 +1,6 @@
 "use strict";
 var TCall = require("./t_call")["default"] || require("./t_call");
-var Processor = require("./processor")["default"] || require("./processor");
+var Visitor = require("./visitor")["default"] || require("./visitor");
 
 function Extractor(ast, options){
   options = options || {};
@@ -8,7 +8,7 @@ function Extractor(ast, options){
   this.helperKey = options.helperKey || 't';
 }
 
-Extractor.prototype = Object.create(Processor);
+Extractor.prototype = Object.create(Visitor);
 
 Extractor.prototype.forEach = function(handler) {
   this.handler = handler;
@@ -16,21 +16,25 @@ Extractor.prototype.forEach = function(handler) {
 };
 
 Extractor.prototype.processSexpr = function(sexpr) {
-  Processor.processSexpr.call(this, sexpr);
+  Visitor.processSexpr.call(this, sexpr);
   if (sexpr.id.string === this.helperKey) {
     this.processTranslateCall(sexpr);
   }
 };
 
+Extractor.prototype.buildTranslateCall = function(sexpr) {
+  return new TCall(sexpr);
+};
+
 Extractor.prototype.processTranslateCall = function(sexpr) {
-  var call = new TCall(sexpr)
+  var call = this.buildTranslateCall(sexpr)
     , translations = call.translations()
     , translation
     , i
     , len;
   for (i = 0, len = translations.length; i < len; i++) {
     translation = translations[i];
-    this.handler(translation[0], translation[1]);
+    this.handler(translation[0], translation[1], call);
   }
 };
 

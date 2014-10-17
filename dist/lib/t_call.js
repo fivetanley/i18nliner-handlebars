@@ -1,10 +1,9 @@
 "use strict";
 var I18nliner = require("i18nliner")["default"] || require("i18nliner");
-var TranslateCall = I18nliner.TranslateCall
-  , CallHelpers   = I18nliner.CallHelpers;
+var TranslateCall = I18nliner.TranslateCall;
 
 /*
- * little wrapper around I18nliner.TranslateCall
+ * hbs-capable version of TranslateCall
  *
  * normalizes args/etc into literals that TranslateCall can deal with
  */
@@ -12,10 +11,11 @@ function TCall(sexpr) {
   var line = sexpr.firstLine
     , method = sexpr.string
     , args = this.processArguments(sexpr);
-  this.translateCall = new TranslateCall(line, method, args);
+  TranslateCall.call(this, line, method, args);
 }
 
-TCall.prototype.UNSUPPORTED_EXPRESSION = CallHelpers.UNSUPPORTED_EXPRESSION;
+TCall.prototype = Object.create(TranslateCall.prototype);
+TCall.prototype.constructor = TCall;
 
 TCall.prototype.processArguments = function(sexpr) {
   var args = sexpr.params
@@ -47,10 +47,6 @@ TCall.prototype.processHash = function(pairs) {
   for (i = 0; i < len; i++)
     result[pairs[i][0]] = this.UNSUPPORTED_EXPRESSION;
   return result;
-};
-
-TCall.prototype.translations = function() {
-  return this.translateCall.translations();
 };
 
 exports["default"] = TCall;

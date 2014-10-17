@@ -114,7 +114,8 @@ var PreProcessor = {
       , hash = parts.hash
       , pairs;
     node = node.mustache;
-    node.params.push(this.inferKey(defaultValue));
+    if (!node.params.length)
+      node.params.push(this.inferKey(defaultValue));
     node.params.push(new StringNode(defaultValue));
     node.isHelper = 1;
     node.sexpr.isHelper = 1;
@@ -189,18 +190,22 @@ var PreProcessor = {
     }.bind(this));
   },
 
+  normalizeInterpolationKey: function(key) {
+    key = key.replace(/[^a-z0-9]/gi, ' ');
+    key = key.replace(/([A-Z\d]+|[a-z])([A-Z])/g, "$1_$2");
+    key = key.toLowerCase();
+    key = key.trim();
+    key = key.replace(/ +/g, '_');
+    return key.substring(0, 32);
+  },
+
   inferInterpolationKey: function(sexpr, keyMap) {
     var key
       , baseKey
       , i = 0;
     key = this.stringParts(sexpr).join(" ");
     key = key.replace(/^__i18nliner_safe /, '');
-    key = key.replace(/[^a-z0-9]/gi, ' ');
-    key = key.replace(/([A-Z\d]+|[a-z])([A-Z])/g, "$1_$2");
-    key = key.toLowerCase();
-    key = key.trim();
-    key = key.replace(/ +/g, '_');
-    key = key.substring(0, 32);
+    key = this.normalizeInterpolationKey(key);
     baseKey = key;
     while (keyMap[key] && keyMap[key] !== baseKey) {
       key = baseKey + "_" + i;
