@@ -1,7 +1,7 @@
 {
   "name": "i18nliner-handlebars",
   "description": "handlebars i18n made simple",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "contributors": [
     {
       "name": "Jon Jensen"
@@ -35,6 +35,6 @@
     "jsdom": "~0.8.10"
   },
   "peerDependencies": {
-    "i18nliner": "0.0.10"
+    "i18nliner": "0.0.11"
   }
 }
