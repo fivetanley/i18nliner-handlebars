@@ -166,6 +166,13 @@ describe("PreProcessor", function() {
       );
     });
 
+    it("doesn't replace existing paths in the options hash", function() {
+      assert.equal(
+        p('{{#t type=../type}}Important {{type}} tip:{{/t}}'),
+        c('{{t "key" "Important %{type} tip:" type=../type i18n_inferred_key=true}}')
+      );
+    });
+
     it("unescapes entities", function() {
       assert.equal(
         p('{{#t}}' +
