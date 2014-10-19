@@ -32,7 +32,7 @@ describe("PreProcessor", function() {
     it("transforms t block expressions", function() {
       assert.equal(
         p('{{#t}}hello world!{{/t}}'),
-        c('{{t "key" "hello world!"}}')
+        c('{{t "key" "hello world!" i18n_inferred_key=true}}')
       );
     });
 
@@ -46,7 +46,7 @@ describe("PreProcessor", function() {
     it("removes extraneous whitespace from the default", function() {
       assert.equal(
         p('{{#t}} ohai!  lulz\t {{/t}}'),
-        c('{{t "key" "ohai! lulz"}}')
+        c('{{t "key" "ohai! lulz" i18n_inferred_key=true}}')
       );
     });
 
@@ -57,7 +57,7 @@ describe("PreProcessor", function() {
           '  <input>' +
           '{{/if}}'),
         c('{{#if foo}}' +
-          '  {{t "key" "Your Name"}}' +
+          '  {{t "key" "Your Name" i18n_inferred_key=true}}' +
           '  <input>' +
           '{{/if}}')
       );
@@ -80,7 +80,7 @@ describe("PreProcessor", function() {
         p('{{#t}}' +
           '  <b>bold</b>, or even <a href="#"><i><img>combos</i></a> get wrapper\'d' +
           '{{/t}}'),
-        c('{{t "key" "*bold*, or even **combos** get wrapper\'d" w0="<b>$1</b>" w1="<a href=\\"#\\"><i><img />$1</i></a>"}}')
+        c('{{t "key" "*bold*, or even **combos** get wrapper\'d" w0="<b>$1</b>" w1="<a href=\\"#\\"><i><img />$1</i></a>" i18n_inferred_key=true}}')
       );
     });
 
@@ -96,7 +96,7 @@ describe("PreProcessor", function() {
           '  the wrappers for' +
           '  <b>these</b> <b>tags</b> are the same' +
           '{{/t}}'),
-        c('{{t "key" "the wrappers for *these* *tags* are the same" w0="<b>$1</b>"}}')
+        c('{{t "key" "the wrappers for *these* *tags* are the same" w0="<b>$1</b>" i18n_inferred_key=true}}')
       );
     });
 
@@ -105,7 +105,7 @@ describe("PreProcessor", function() {
         p('{{#t}}' +
           '  Hello, {{name}}' +
           '{{/t}}'),
-        c('{{t "key" "Hello, %{name}" name=name}}')
+        c('{{t "key" "Hello, %{name}" name=name i18n_inferred_key=true}}')
       );
     });
 
@@ -114,7 +114,7 @@ describe("PreProcessor", function() {
         p('{{#t}}' +
           '  Hello, {{pig-latin name}}' +
           '{{/t}}'),
-        c('{{t "key" "Hello, %{pig_latin_name}" pig_latin_name=(pig-latin name)}}')
+        c('{{t "key" "Hello, %{pig_latin_name}" pig_latin_name=(pig-latin name) i18n_inferred_key=true}}')
       );
     });
 
@@ -123,7 +123,7 @@ describe("PreProcessor", function() {
         p('{{#t}}' +
           '  Go to <a href="/asdf" title="{{name}}">your account</a>' +
           '{{/t}}'),
-        c('{{t "key" "Go to *your account*" w0=(__i18nliner_concat "<a href=\\"/asdf\\" title=\\"" (__i18nliner_escape name) "\\">$1</a>")}}')
+        c('{{t "key" "Go to *your account*" w0=(__i18nliner_concat "<a href=\\"/asdf\\" title=\\"" (__i18nliner_escape name) "\\">$1</a>") i18n_inferred_key=true}}')
       );
     });
 
@@ -132,7 +132,7 @@ describe("PreProcessor", function() {
         p('{{#t}}' +
           '  Go to <a href="/asdf" title="{{pig-latin name}}">your account</a>' +
           '{{/t}}'),
-        c('{{t "key" "Go to *your account*" w0=(__i18nliner_concat "<a href=\\"/asdf\\" title=\\"" (__i18nliner_escape (pig-latin name)) "\\">$1</a>")}}')
+        c('{{t "key" "Go to *your account*" w0=(__i18nliner_concat "<a href=\\"/asdf\\" title=\\"" (__i18nliner_escape (pig-latin name)) "\\">$1</a>") i18n_inferred_key=true}}')
       );
     });
 
@@ -144,7 +144,7 @@ describe("PreProcessor", function() {
         p('{{#t}}' +
           '  Go to <a href="/asdf" title="{{#t}}manage account stuffs, {{name}}{{/t}}">your account</a>' +
           '{{/t}}'),
-        c('{{t "key" "Go to *your account*" w0=(__i18nliner_concat "<a href=\\"/asdf\\" title=\\"" (__i18nliner_escape (t "key" "manage account stuffs, %{name}" name=name)) "\\">$1</a>")}}')
+        c('{{t "key" "Go to *your account*" w0=(__i18nliner_concat "<a href=\\"/asdf\\" title=\\"" (__i18nliner_escape (t "key" "manage account stuffs, %{name}" name=name i18n_inferred_key=true)) "\\">$1</a>") i18n_inferred_key=true}}')
       );
     });
 
@@ -153,7 +153,7 @@ describe("PreProcessor", function() {
         p('{{#t}}' +
           '  Create <input type="text" name="count"> groups' +
           '{{/t}}'),
-        c('{{t "key" "Create %{input_type_text_name_count} groups" input_type_text_name_count=(__i18nliner_safe "<input type=\\"text\\" name=\\"count\\" />")}}')
+        c('{{t "key" "Create %{input_type_text_name_count} groups" input_type_text_name_count=(__i18nliner_safe "<input type=\\"text\\" name=\\"count\\" />") i18n_inferred_key=true}}')
       );
     });
 
@@ -162,7 +162,7 @@ describe("PreProcessor", function() {
         p('{{#t}}' +
           '  &copy; 2014 ACME Corp. All Rights Reserved. Our lawyers &gt; your lawyers' +
           '{{/t}}'),
-        c('{{t "key" "© 2014 ACME Corp. All Rights Reserved. Our lawyers > your lawyers"}}')
+        c('{{t "key" "© 2014 ACME Corp. All Rights Reserved. Our lawyers > your lawyers" i18n_inferred_key=true}}')
       );
     });
   });
