@@ -132,8 +132,15 @@ var PreProcessor = {
     if (hash.length) {
       if (!node.hash)
         node.hash = node.sexpr.hash = new HashNode([]);
+      var existingKeys = {}
+        , len
+        , i;
       pairs = node.hash.pairs;
-      node.hash.pairs = pairs.concat(hash);
+      for (i = 0, len = pairs.length; i < len; i++)
+        existingKeys[pairs[i][0]] = true;
+      for (i = 0, len = hash.length; i < len; i++)
+        if (!existingKeys[hash[i][0]])
+          pairs.push(hash[i]);
     }
     return node;
   },
