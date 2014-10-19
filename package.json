@@ -1,7 +1,7 @@
 {
   "name": "i18nliner-handlebars",
   "description": "handlebars i18n made simple",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "contributors": [
     {
       "name": "Jon Jensen"

@@ -59,10 +59,10 @@ function stringNode(string) {
   return new StringNode(string);
 }
 
-function safeNode(string) {
+function safeNode(sexpr) {
   var parts = [
     new IdNode([{part: '__i18nliner_safe'}]),
-    new StringNode(string)
+    sexpr
   ];
   return new SexprNode(parts);
 }
@@ -165,6 +165,8 @@ var PreProcessor = {
         node = statement.sexpr;
         if (!node.isHelper) node = node.id;
         delete node.isRoot;
+        if (!statement.escaped)
+          node = safeNode(node);
         return tempMap.add(node);
     }
   },
@@ -265,7 +267,7 @@ var PreProcessor = {
         this.findOrAddWrapper(wrapper, wrappers, tempMap);
         result += this.wrap(wrappedText, wrappers.length);
       } else {
-        result += tempMap.add(safeNode(node.outerHTML));
+        result += tempMap.add(safeNode(stringNode(node.outerHTML)));
       }
     }
     return result;
