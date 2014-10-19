@@ -16,8 +16,6 @@ yay readme-driven development!
    * bound helper support
    * ability to nest link-to (and possibly others) in a block
      translation (like we do in i18nliner.rb)
- * audit/fix/implement html-safety gaps. e.g. placeholder are assumed to
-   be unsafe (we don't check the escaped bit)
  * bower
 
 ====
