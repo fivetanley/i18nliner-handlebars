@@ -17,6 +17,7 @@ var dom = (function(){
 var CallHelpers = I18nliner.CallHelpers
   , AST = Handlebars.AST
   , StringNode = AST.StringNode
+  , BooleanNode = AST.BooleanNode
   , HashNode = AST.HashNode
   , SexprNode = AST.SexprNode
   , IdNode = AST.IdNode
@@ -96,16 +97,23 @@ var PreProcessor = {
       , statement
       , i;
     for (i = 0; i < statementsLen; i++) {
-      statement = statements[i];
-      if (statement.type !== 'block') continue;
-      // consume anything inside this first (e.g. if we have nested t blocks)
-      this.process(statement.program);
-      if (statement.inverse)
-        this.process(statement.inverse);
-      if (statement.mustache.id.string === "t") {
-        statements[i] = this.transform(statement);
-      }
+      statement = this.processStatement(statements[i]);
+      if (typeof statement !== 'undefined')
+        statements[i] = statement;
     }
+  },
+
+  processStatement: function(statement) {
+    if (statement.type !== 'block') return;
+
+    // consume anything inside this first (e.g. if we have nested t blocks)
+    this.process(statement.program);
+    if (statement.inverse)
+      this.process(statement.inverse);
+
+    if (statement.mustache.id.string !== "t") return;
+
+    return this.transform(statement);
   },
 
   transform: function(node) {
@@ -114,8 +122,10 @@ var PreProcessor = {
       , hash = parts.hash
       , pairs;
     node = node.mustache;
-    if (!node.params.length)
+    if (!node.params.length) {
       node.params.push(this.inferKey(defaultValue));
+      hash.push(["i18n_inferred_key", new BooleanNode(true)]);
+    }
     node.params.push(new StringNode(defaultValue));
     node.isHelper = 1;
     node.sexpr.isHelper = 1;
