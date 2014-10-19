@@ -157,6 +157,15 @@ describe("PreProcessor", function() {
       );
     });
 
+    it("correctly flags safe expressions", function() {
+      assert.equal(
+        p('{{#t}}' +
+          '  Create {{{num_input}}} groups' +
+          '{{/t}}'),
+        c('{{t "key" "Create %{num_input} groups" num_input=(__i18nliner_safe num_input) i18n_inferred_key=true}}')
+      );
+    });
+
     it("unescapes entities", function() {
       assert.equal(
         p('{{#t}}' +
