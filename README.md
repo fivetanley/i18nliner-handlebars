@@ -167,17 +167,19 @@ during Handlebars parsing:
 <p>
   {{t "some_unique_key"
       "*Ohai %{user_name}*, you can **lead** a new discussion or ***join*** an existing one."
-      user_name: user.name
-      w0='<b>\1</b>',
-      w1=(__i18nliner_concat '<a href="/new" title="' (__i18nliner_escape (some helper)) '">$1</a>')
-      w2='<a href="/search>$1</a>'
+      user_name=(user.name)
+      w0="<b>$1</b>"
+      w1=(__i18nliner_concat "<a href=\"/new\" title=\""
+                             (__i18nliner_escape (some helper))
+                             "\">$1</a>")
+      w2="<a href="/search>$1</a>"
   }}
 </p>
 ```
 
 In other words, it will infer wrappers from your (balanced) markup, and
 will create placeholders for any other (inline) handlebars expressions.
-Block helpers (e.g. `{{#if cond %>...`) are *not* supported within a
+Block helpers (e.g. `{{#if cond }}...`) are *not* supported within a
 block translation. The only exception to this rule is nested translation
 calls, e.g. this is totally fine:
 
