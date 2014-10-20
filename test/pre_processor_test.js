@@ -181,5 +181,28 @@ describe("PreProcessor", function() {
         c('{{t "key" "© 2014 ACME Corp. All Rights Reserved. Our lawyers > your lawyers" i18n_inferred_key=true}}')
       );
     });
+
+    if (Handlebars.VERSION < "2.") {
+      it("moves the sub-expression to the front of the options hash", function() {
+        assert.equal(
+          p('{{#t}}' +
+            '  Group {{group.name}} has {{{num_input}}} slots' +
+            '{{/t}}'),
+          c('{{t "key" "Group %{group_name} has %{num_input} slots" num_input=(__i18nliner_safe num_input) group_name=group.name i18n_inferred_key=true}}')
+        );
+      });
+
+      it("returns an error if multiple sub-expressions are used", function() {
+        // either explicit
+        assert.throws(function() {
+          p('{{#t}}it\'s due on {{boldify (format "date")}} on {{boldify (format "time")}}{{/t}}');
+        }, Errors.MultipleSubExpressionsError);
+
+        // or inferred from complicated wrappers
+        assert.throws(function() {
+          p('{{#t}}<a href="{{blurUrl"}}">blue pill</a> or <a href="{{redUrl"}}">red pill</a>?{{/t}}');
+        }, Errors.MultipleSubExpressionsError);
+      });
+    }
   });
 });
