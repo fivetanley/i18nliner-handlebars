@@ -200,7 +200,7 @@ describe("PreProcessor", function() {
 
         // or inferred from complicated wrappers
         assert.throws(function() {
-          p('{{#t}}<a href="{{blurUrl"}}">blue pill</a> or <a href="{{redUrl"}}">red pill</a>?{{/t}}');
+          p('{{#t}}<a href="{{blueUrl}}">blue pill</a> or <a href="{{redUrl}}">red pill</a>?{{/t}}');
         }, Errors.MultipleSubExpressionsError);
       });
     }
