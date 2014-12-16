@@ -46,7 +46,7 @@ describe("Extractor", function() {
     );
     assert.deepEqual(
       extract("{{t 'dog' count=count}}"),
-      {"dog_c158cde1": {one: "1 dog", other: "%{count} dogs"}}
+      {"count_dogs_d378e7": {one: "1 dog", other: "%{count} dogs"}}
     );
     assert.deepEqual(
       extract("{{t 'hello %{user}' user=user.name}}"),
