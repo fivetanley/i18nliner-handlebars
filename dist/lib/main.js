@@ -1,10 +1,14 @@
 "use strict";
-var PreProcessor = require("./pre_processor")["default"] || require("./pre_processor");
-var Extractor = require("./extractor")["default"] || require("./extractor");
-var HbsProcessor = require("./hbs_processor")["default"] || require("./hbs_processor");
 
-var I18nliner = require("i18nliner")["default"] || require("i18nliner");
-I18nliner.Commands.Check.config.processors.push(HbsProcessor);
+var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
 
-exports.PreProcessor = PreProcessor;
-exports.Extractor = Extractor;
+var PreProcessor = _interopRequire(require("./pre_processor"));
+
+var HbsProcessor = _interopRequire(require("./hbs_processor"));
+
+var registerPlugin = function registerPlugin(i18nliner) {
+  i18nliner.processors.HbsProcessor = HbsProcessor;
+};
+registerPlugin.PreProcessor = PreProcessor;
+
+module.exports = registerPlugin;

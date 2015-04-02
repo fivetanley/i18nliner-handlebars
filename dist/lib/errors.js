@@ -1,9 +1,11 @@
 "use strict";
-var I18nliner = require("i18nliner")["default"] || require("i18nliner");
-var Errors = I18nliner.Errors;
 
-Errors.register('TBlockNestingError');
-Errors.register('UnwrappableContentError');
-Errors.register('MultipleSubExpressionsError');
+var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
 
-exports["default"] = Errors;
+var Errors = _interopRequire(require("i18nliner/dist/lib/errors"));
+
+Errors.register("TBlockNestingError");
+Errors.register("UnwrappableContentError");
+Errors.register("MultipleSubExpressionsError");
+
+module.exports = Errors;
