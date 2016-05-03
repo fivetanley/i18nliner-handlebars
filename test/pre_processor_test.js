@@ -80,7 +80,7 @@ describe("PreProcessor", function() {
         p('{{#t}}' +
           '  <b>bold</b>, or even <a href="#"><i><img>combos</i></a> get wrapper\'d' +
           '{{/t}}'),
-        c('{{t "key" "*bold*, or even **combos** get wrapper\'d" w0="<b>$1</b>" w1="<a href=\\"#\\"><i><img />$1</i></a>" i18n_inferred_key=true}}')
+        c('{{t "key" "*bold*, or even **combos** get wrapper\'d" w0="<b>$1</b>" w1="<a href=\\"#\\"><i><img>$1</i></a>" i18n_inferred_key=true}}')
       );
     });
 
@@ -153,7 +153,7 @@ describe("PreProcessor", function() {
         p('{{#t}}' +
           '  Create <input type="text" name="count"> groups' +
           '{{/t}}'),
-        c('{{t "key" "Create %{input_type_text_name_count} groups" input_type_text_name_count=(__i18nliner_safe "<input type=\\"text\\" name=\\"count\\" />") i18n_inferred_key=true}}')
+        c('{{t "key" "Create %{input_type_text_name_count} groups" input_type_text_name_count=(__i18nliner_safe "<input type=\\"text\\" name=\\"count\\">") i18n_inferred_key=true}}')
       );
     });
 
