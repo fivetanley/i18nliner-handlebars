@@ -70,6 +70,6 @@ describe("Extractor", function() {
     }, Errors.MissingInterpolationValue);
     assert.throws(function(){
       extract("{{t 'a' 'a' 'a'}}");
-    }, Errors.InvalidSignature);
+    });
   });
 });
