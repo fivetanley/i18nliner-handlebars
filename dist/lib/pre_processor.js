@@ -16,7 +16,7 @@ var dom = (function () {
   if (typeof window !== "undefined") {
     return window.document;
   } else {
-    return jsdom().parentWindow.document;
+    return jsdom().defaultView.document;
   }
 })();
 

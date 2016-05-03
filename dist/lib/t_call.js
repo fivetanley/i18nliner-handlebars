@@ -13,6 +13,7 @@ function TCall(sexpr) {
   var line = sexpr.firstLine,
       method = sexpr.string,
       args = this.processArguments(sexpr);
+
   TranslateCall.call(this, line, method, args);
 }
 
@@ -33,11 +34,7 @@ TCall.prototype.processArguments = function (sexpr) {
 };
 
 TCall.prototype.evaluateExpression = function (node) {
-  switch (node.type) {
-    case "STRING":
-      return node.string;
-  }
-  return this.UNSUPPORTED_EXPRESSION;
+  return node.type === "STRING" ? node.string : this.UNSUPPORTED_EXPRESSION;
 };
 
 TCall.prototype.processHash = function (pairs) {
