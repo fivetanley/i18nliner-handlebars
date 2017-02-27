@@ -1,26 +1,36 @@
 "use strict";
 
-var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _handlebars = require("handlebars");
+
+var _handlebars2 = _interopRequireDefault(_handlebars);
+
+var _jsdom = require("jsdom");
+
+var _call_helpers = require("i18nliner/dist/lib/call_helpers");
+
+var _call_helpers2 = _interopRequireDefault(_call_helpers);
+
+var _errors = require("./errors");
+
+var _errors2 = _interopRequireDefault(_errors);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /* global window */
 
-var Handlebars = _interopRequire(require("handlebars"));
-
-var jsdom = require("jsdom").jsdom;
-
-var CallHelpers = _interopRequire(require("i18nliner/dist/lib/call_helpers"));
-
-var Errors = _interopRequire(require("./errors"));
-
-var dom = (function () {
-  if (typeof window !== "undefined") {
+var dom = function () {
+  if (typeof window !== 'undefined') {
     return window.document;
   } else {
-    return jsdom().defaultView.document;
+    return (0, _jsdom.jsdom)().defaultView.document;
   }
-})();
+}();
 
-var AST = Handlebars.AST,
+var AST = _handlebars2.default.AST,
     StringNode = AST.StringNode,
     BooleanNode = AST.BooleanNode,
     HashNode = AST.HashNode,
@@ -65,12 +75,12 @@ function stringNode(string) {
 }
 
 function safeNode(sexpr) {
-  var parts = [new IdNode([{ part: "__i18nliner_safe" }]), sexpr];
+  var parts = [new IdNode([{ part: '__i18nliner_safe' }]), sexpr];
   return new SexprNode(parts);
 }
 
 function escapeNode(sexpr) {
-  var parts = [new IdNode([{ part: "__i18nliner_escape" }]), sexpr];
+  var parts = [new IdNode([{ part: '__i18nliner_escape' }]), sexpr];
   return new SexprNode(parts);
 }
 
@@ -83,7 +93,7 @@ function concatNode(string, tempMap) {
     part = parts[i];
     parts[i] = part.match(TEMP_PLACEHOLDER) ? escapeNode(tempMap.get(part)) : stringNode(part);
   }
-  parts.unshift(new IdNode([{ part: "__i18nliner_concat" }]));
+  parts.unshift(new IdNode([{ part: '__i18nliner_concat' }]));
   return new SexprNode(parts);
 }
 
@@ -111,20 +121,20 @@ var PreProcessor = {
         i;
     for (i = 0; i < statementsLen; i++) {
       statement = this.processStatement(statements[i]);
-      if (typeof statement !== "undefined") statements[i] = statement;
+      if (typeof statement !== 'undefined') statements[i] = statement;
     }
   },
 
   processStatement: function processStatement(statement) {
-    if (statement.type !== "block") {
-      return;
-    } // consume anything inside this first (e.g. if we have nested t blocks)
+    if (statement.type !== 'block') return;
+
+    // consume anything inside this first (e.g. if we have nested t blocks)
     this.process(statement.program);
     if (statement.inverse) this.process(statement.inverse);
 
-    if (statement.mustache.id.string !== "t") {
-      return;
-    }return this.transform(statement);
+    if (statement.mustache.id.string !== "t") return;
+
+    return this.transform(statement);
   },
 
   transform: function transform(node) {
@@ -144,17 +154,19 @@ var PreProcessor = {
   },
 
   updateHash: function updateHash(node, hash) {
-    if (!hash.length) {
-      return;
-    }if (!node.hash) node.hash = node.sexpr.hash = new HashNode([]);
+    if (!hash.length) return;
+
+    if (!node.hash) node.hash = node.sexpr.hash = new HashNode([]);
     var existingKeys = {},
         len,
         i,
         pairs;
     pairs = node.hash.pairs;
-    for (i = 0, len = pairs.length; i < len; i++) existingKeys[pairs[i][0]] = true;
-    for (i = 0, len = hash.length; i < len; i++) if (!existingKeys[hash[i][0]]) pairs.push(hash[i]);
-    if (Handlebars.VERSION < "2.0") this.applySubExpressionHack(node);
+    for (i = 0, len = pairs.length; i < len; i++) {
+      existingKeys[pairs[i][0]] = true;
+    }for (i = 0, len = hash.length; i < len; i++) {
+      if (!existingKeys[hash[i][0]]) pairs.push(hash[i]);
+    }if (_handlebars2.default.VERSION < "2.0") this.applySubExpressionHack(node);
   },
 
   /*
@@ -173,11 +185,11 @@ var PreProcessor = {
       return type === "sexpr" ? 0 : 1;
     });
     var pairs = node.hash.pairs;
-    if (pairs.length > 1 && pairs[1][1].type === "sexpr") throw new Errors.MultipleSubExpressionsError(node.firstLine, "Handlebars 1.3 doesn't support multiple sub-expressions in the options hash");
+    if (pairs.length > 1 && pairs[1][1].type === "sexpr") throw new _errors2.default.MultipleSubExpressionsError(node.firstLine, "Handlebars 1.3 doesn't support multiple sub-expressions in the options hash");
   },
 
   inferKey: function inferKey(defaultValue) {
-    return new StringNode(CallHelpers.inferKey(defaultValue));
+    return new StringNode(_call_helpers2.default.inferKey(defaultValue));
   },
 
   inferParts: function inferParts(statements) {
@@ -195,11 +207,11 @@ var PreProcessor = {
   stringForStatement: function stringForStatement(statement, tempMap) {
     var node;
     switch (statement.type) {
-      case "block":
-        throw new Errors.TBlockNestingError(statement.firstLine, "can't nest block expressions inside a t block");
-      case "content":
+      case 'block':
+        throw new _errors2.default.TBlockNestingError(statement.firstLine, "can't nest block expressions inside a t block");
+      case 'content':
         return statement.string;
-      case "mustache":
+      case 'mustache':
         node = statement.sexpr;
         if (!node.isHelper) node = node.id;
         delete node.isRoot;
@@ -209,17 +221,17 @@ var PreProcessor = {
   },
 
   normalizeDefault: function normalizeDefault(string) {
-    return string.replace(/\s+/g, " ").trim();
+    return string.replace(/\s+/g, ' ').trim();
   },
 
   nodesFor: function nodesFor(html) {
-    var div = dom.createElement("div");
+    var div = dom.createElement('div');
     div.innerHTML = html;
     return div.childNodes;
   },
 
   extractTempPlaceholders: function extractTempPlaceholders(statements, tempMap) {
-    var defaultValue = "",
+    var defaultValue = '',
         i,
         statementsLen = statements.length;
     for (i = 0; i < statementsLen; i++) {
@@ -230,21 +242,21 @@ var PreProcessor = {
 
   extractPlaceholders: function extractPlaceholders(string, hash, tempMap) {
     var keyMap = {};
-    return string.replace(TEMP_PLACEHOLDER, (function (match) {
+    return string.replace(TEMP_PLACEHOLDER, function (match) {
       var sexpr = tempMap.get(match),
           key = this.inferInterpolationKey(sexpr, keyMap);
       keyMap[key] = true;
       hash.push([key, sexpr]);
       return "%{" + key + "}";
-    }).bind(this));
+    }.bind(this));
   },
 
   normalizeInterpolationKey: function normalizeInterpolationKey(key) {
-    key = key.replace(/[^a-z0-9]/gi, " ");
+    key = key.replace(/[^a-z0-9]/gi, ' ');
     key = key.replace(/([A-Z\d]+|[a-z])([A-Z])/g, "$1_$2");
     key = key.toLowerCase();
     key = key.trim();
-    key = key.replace(/ +/g, "_");
+    key = key.replace(/ +/g, '_');
     return key.substring(0, 32);
   },
 
@@ -253,7 +265,7 @@ var PreProcessor = {
         baseKey,
         i = 0;
     key = this.stringParts(sexpr).join(" ");
-    key = key.replace(/^__i18nliner_safe /, "");
+    key = key.replace(/^__i18nliner_safe /, '');
     key = this.normalizeInterpolationKey(key);
     baseKey = key;
     while (keyMap[key] && keyMap[key] !== baseKey) {
@@ -266,7 +278,7 @@ var PreProcessor = {
   stringParts: function stringParts(sexpr, result) {
     var i, len, items;
     result = result || [];
-    if (sexpr.type === "sexpr") {
+    if (sexpr.type === 'sexpr') {
       this.stringParts(sexpr.id, result);
       items = sexpr.params;
       for (i = 0, len = items.length; i < len; i++) {
@@ -286,7 +298,7 @@ var PreProcessor = {
   },
 
   extractWrappers: function extractWrappers(source, wrappers, tempMap, context) {
-    var result = "",
+    var result = '',
         nodes = this.nodesFor(source),
         nodesLen = nodes.length,
         node,
@@ -295,7 +307,7 @@ var PreProcessor = {
         i;
     for (i = 0; i < nodesLen; i++) {
       node = nodes[i];
-      if (node.nodeName === "#text") {
+      if (node.nodeName === '#text') {
         result += node.nodeValue;
       } else if (wrappedText = this.extractText(node, context)) {
         wrapper = node.outerHTML.replace(wrappedText, "$1");
@@ -313,22 +325,20 @@ var PreProcessor = {
         factory = wrapper.match(TEMP_PLACEHOLDER) ? concatNode : stringNode,
         i;
     for (i = 0; i < wrappersLen; i++) {
-      if (wrappers[i][1].string === wrapper) {
-        return i;
-      }
+      if (wrappers[i][1].string === wrapper) return i;
     }
     wrappers.push(["w" + i, factory(wrapper, tempMap)]);
     return i;
   },
 
   extractText: function extractText(rootNode, context) {
-    var text = "",
+    var text = '',
         nodes = slice.call(rootNode.childNodes),
         node;
     while (node = nodes.shift()) {
-      if (node.nodeName === "#text" && node.nodeValue.trim()) {
+      if (node.nodeName === '#text' && node.nodeValue.trim()) {
         if (text) // there can be only one
-          throw new Errors.UnwrappableContentError(context.firstLine, "multiple text nodes in html markup");
+          throw new _errors2.default.UnwrappableContentError(context.firstLine, "multiple text nodes in html markup");
         text = node.nodeValue;
       } else if (node.childNodes.length) {
         nodes = nodes.concat(slice.call(node.childNodes));
@@ -343,4 +353,4 @@ var PreProcessor = {
   }
 };
 
-module.exports = PreProcessor;
+exports.default = PreProcessor;

@@ -1,3 +1,8 @@
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 /*
  * simple handlebars AST traverser
  *
@@ -5,8 +10,6 @@
  * things as needed to make it useful (e.g. override processSexpr if you
  * want to know when particular helpers are called)
  */
-
-"use strict";
 
 var Visitor = {
   process: function process(ast) {
@@ -20,14 +23,14 @@ var Visitor = {
 
   processExpression: function processExpression(statement) {
     switch (statement.type) {
-      case "block":
+      case 'block':
         this.process(statement.program);
         if (statement.inverse) this.process(statement.inverse);
         break;
-      case "mustache":
+      case 'mustache':
         this.processSexpr(statement.sexpr);
         break;
-      case "sexpr":
+      case 'sexpr':
         this.processSexpr(statement);
         break;
     }
@@ -35,7 +38,7 @@ var Visitor = {
 
   processSexpr: function processSexpr(sexpr) {
     var i, len, items;
-    if (sexpr.type === "sexpr") {
+    if (sexpr.type === 'sexpr') {
       this.processExpression(sexpr.id);
       items = sexpr.params;
       for (i = 0, len = items.length; i < len; i++) {
@@ -51,4 +54,4 @@ var Visitor = {
   }
 };
 
-module.exports = Visitor;
+exports.default = Visitor;

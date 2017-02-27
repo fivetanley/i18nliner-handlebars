@@ -1,14 +1,22 @@
-"use strict";
+'use strict';
 
-var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 
-var PreProcessor = _interopRequire(require("./pre_processor"));
+var _pre_processor = require('./pre_processor');
 
-var HbsProcessor = _interopRequire(require("./hbs_processor"));
+var _pre_processor2 = _interopRequireDefault(_pre_processor);
+
+var _hbs_processor = require('./hbs_processor');
+
+var _hbs_processor2 = _interopRequireDefault(_hbs_processor);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var registerPlugin = function registerPlugin(i18nliner) {
-  i18nliner.processors.HbsProcessor = HbsProcessor;
+  i18nliner.processors.HbsProcessor = _hbs_processor2.default;
 };
-registerPlugin.PreProcessor = PreProcessor;
+registerPlugin.PreProcessor = _pre_processor2.default;
 
-module.exports = registerPlugin;
+exports.default = registerPlugin;

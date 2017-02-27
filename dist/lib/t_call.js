@@ -1,8 +1,14 @@
 "use strict";
 
-var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 
-var TranslateCall = _interopRequire(require("i18nliner/dist/lib/extractors/translate_call"));
+var _translate_call = require("i18nliner/dist/lib/extractors/translate_call");
+
+var _translate_call2 = _interopRequireDefault(_translate_call);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /*
  * hbs-capable version of TranslateCall
@@ -14,10 +20,10 @@ function TCall(sexpr) {
       method = sexpr.string,
       args = this.processArguments(sexpr);
 
-  TranslateCall.call(this, line, method, args);
+  _translate_call2.default.call(this, line, method, args);
 }
 
-TCall.prototype = Object.create(TranslateCall.prototype);
+TCall.prototype = Object.create(_translate_call2.default.prototype);
 TCall.prototype.constructor = TCall;
 
 TCall.prototype.processArguments = function (sexpr) {
@@ -34,7 +40,7 @@ TCall.prototype.processArguments = function (sexpr) {
 };
 
 TCall.prototype.evaluateExpression = function (node) {
-  return node.type === "STRING" ? node.string : this.UNSUPPORTED_EXPRESSION;
+  return node.type === 'STRING' ? node.string : this.UNSUPPORTED_EXPRESSION;
 };
 
 TCall.prototype.processHash = function (pairs) {
@@ -43,8 +49,9 @@ TCall.prototype.processHash = function (pairs) {
   var result = {},
       len = pairs.length,
       i;
-  for (i = 0; i < len; i++) result[pairs[i][0]] = this.UNSUPPORTED_EXPRESSION;
-  return result;
+  for (i = 0; i < len; i++) {
+    result[pairs[i][0]] = this.UNSUPPORTED_EXPRESSION;
+  }return result;
 };
 
-module.exports = TCall;
+exports.default = TCall;
